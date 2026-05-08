@@ -72,9 +72,9 @@ async function loadSettings() {
 
 function messageKey(entry) {
   return [
+    entry?.id,
     entry?.announcementId,
-    entry?.ts,
-    entry?.message,
+    entry?.path,
     entry?.vesselName,
   ]
     .filter(Boolean)
@@ -144,8 +144,22 @@ async function loadMessages() {
 async function enableSound() {
   soundEnabled = true;
   els.enableSound.classList.add("enabled");
+  els.enableSound.setAttribute("aria-pressed", "true");
+  els.enableSound.textContent = "Sound off";
   els.status.textContent = "Sound on";
   await beep();
+}
+
+async function toggleSound() {
+  if (soundEnabled) {
+    soundEnabled = false;
+    els.enableSound.classList.remove("enabled");
+    els.enableSound.setAttribute("aria-pressed", "false");
+    els.enableSound.textContent = "Sound on";
+    els.status.textContent = "Sound off";
+    return;
+  }
+  await enableSound();
 }
 
 async function refreshLoop() {
@@ -161,7 +175,7 @@ async function refreshLoop() {
 }
 
 els.enableSound.addEventListener("click", () => {
-  enableSound().catch((error) => {
+  toggleSound().catch((error) => {
     console.error(error);
     els.status.textContent = "Sound blocked";
     els.status.classList.add("error");
