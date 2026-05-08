@@ -1,0 +1,38 @@
+{
+  "name": "signalk-ais-plus-apple-watch",
+  "version": "0.1.0",
+  "description": "Minimal Apple Watch webapp for AIS Plus announcement messages.",
+  "main": "plugin/index.js",
+  "scripts": {
+    "test": "node --check plugin/index.js && node --check public/app.js"
+  },
+  "keywords": [
+    "signalk-node-server-plugin",
+    "signalk-webapp",
+    "signalk-category-ais",
+    "apple-watch"
+  ],
+  "author": "Anthony McDonald",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mcdonaldajr/signalk-ais-plus-apple-watch.git"
+  },
+  "bugs": {
+    "url": "https://github.com/mcdonaldajr/signalk-ais-plus-apple-watch/issues"
+  },
+  "homepage": "https://github.com/mcdonaldajr/signalk-ais-plus-apple-watch#readme",
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "plugin",
+    "public",
+    "README.md",
+    "LICENSE"
+  ],
+  "signalk-plugin-enabled-by-default": true,
+  "signalk": {
+    "displayName": "AIS Plus Apple Watch"
+  }
+}
