@@ -1,8 +1,14 @@
 const packageInfo = require("../package.json");
 
+const SETTINGS_PATH = "plugins.aisPlusAppleWatch.settings";
+const MESSAGES_PATH = "plugins.aisPlusAppleWatch.messages";
+const MAX_STORED_MESSAGES = 50;
+
 module.exports = function aisPlusAppleWatch(app) {
   const plugin = {};
   let options = normalizeOptions({});
+  let unsubscribes = [];
+  let messages = [];
 
   plugin.id = "signalk-ais-plus-apple-watch";
   plugin.name = "AIS Plus Alerts";
@@ -61,10 +67,21 @@ module.exports = function aisPlusAppleWatch(app) {
 
   plugin.start = (pluginOptions = {}) => {
     options = normalizeOptions(pluginOptions);
+    publishWatchState();
+    subscribeToAisPlusAnnouncements();
     app.setPluginStatus(`Started v${packageInfo.version}`);
   };
 
-  plugin.stop = () => {};
+  plugin.stop = () => {
+    for (const unsubscribe of unsubscribes) {
+      try {
+        unsubscribe();
+      } catch (error) {
+        app.debug(`[${plugin.id}] unsubscribe failed: ${error.message}`);
+      }
+    }
+    unsubscribes = [];
+  };
 
   plugin.registerWithRouter = function registerWithRouter(router) {
     router.get("/settings", (_req, res) => {
@@ -78,6 +95,100 @@ module.exports = function aisPlusAppleWatch(app) {
   };
 
   return plugin;
+
+  function subscribeToAisPlusAnnouncements() {
+    if (!app.subscriptionmanager?.subscribe) {
+      app.debug(`[${plugin.id}] Signal K subscription manager is not available`);
+      return;
+    }
+
+    app.subscriptionmanager.subscribe(
+      {
+        context: "vessels.self",
+        subscribe: [
+          {
+            path: "notifications.collision",
+            policy: "instant",
+            format: "delta",
+          },
+          {
+            path: "notifications.collision.*",
+            policy: "instant",
+            format: "delta",
+          },
+        ],
+      },
+      unsubscribes,
+      (error) => app.error(`[${plugin.id}] subscription error: ${error}`),
+      (delta) => handleDelta(delta),
+    );
+  }
+
+  function handleDelta(delta) {
+    for (const update of delta.updates || []) {
+      for (const value of update.values || []) {
+        handleNotificationValue(value);
+      }
+    }
+  }
+
+  function handleNotificationValue(value) {
+    if (!value?.path?.startsWith("notifications.collision")) return;
+
+    if (value.path === "notifications.collision" && value.value && typeof value.value === "object") {
+      for (const [id, notification] of Object.entries(value.value)) {
+        addMessageFromNotification(`notifications.collision.${id}`, notification);
+      }
+      return;
+    }
+
+    addMessageFromNotification(value.path, value.value);
+  }
+
+  function addMessageFromNotification(pathName, value) {
+    if (!value || typeof value !== "object") return;
+    const alertEvent = value?.data?.alertEvent || {};
+    const announcement = value?.data?.announcement || {};
+    const message = String(alertEvent.message || value?.message || "").trim();
+    if (!message) return;
+
+    const id = String(alertEvent.id || announcement.id || `${pathName}-${Date.now()}`);
+    const entry = {
+      id,
+      ts: alertEvent.ts || announcement.ts || new Date().toISOString(),
+      path: pathName,
+      vesselName: alertEvent.vesselName || announcement.vesselName || value?.data?.vesselName || "",
+      severity: alertEvent.state || value?.state || "normal",
+      category: alertEvent.category || value?.data?.category || "",
+      message,
+    };
+
+    messages = [entry, ...messages.filter((item) => item.id !== id)].slice(
+      0,
+      MAX_STORED_MESSAGES,
+    );
+    publishWatchState();
+  }
+
+  function publishWatchState() {
+    app.handleMessage(plugin.id, {
+      context: "vessels.self",
+      updates: [
+        {
+          values: [
+            {
+              path: SETTINGS_PATH,
+              value: options,
+            },
+            {
+              path: MESSAGES_PATH,
+              value: messages,
+            },
+          ],
+        },
+      ],
+    });
+  }
 };
 
 function normalizeOptions(value = {}) {

@@ -12,7 +12,7 @@ Apple Watch can play media audio to paired Bluetooth headphones or speakers, and
 
 ```bash
 cd ~/.signalk
-npm install git+ssh://git@ssh.github.com:443/mcdonaldajr/signalk-ais-plus-apple-watch.git#v0.1.2 --omit=dev --no-package-lock
+npm install git+ssh://git@ssh.github.com:443/mcdonaldajr/signalk-ais-plus-apple-watch.git#v0.1.3 --omit=dev --no-package-lock
 sudo systemctl restart signalk
 ```
 
@@ -39,7 +39,8 @@ The page deliberately avoids charts, graphics, controls, and colours other than 
 ## Requirements
 
 - AIS Plus must be installed and running.
-- The watch page reads `/plugins/signalk-ais-plus/announcementLog`.
+- The plugin subscribes to AIS Plus collision notifications and republishes a small read-only watch feed under `vessels.self.plugins.aisPlusAppleWatch`.
+- The watch page reads Signal K data API paths, not plugin control routes, so it can work with Signal K **Allow Readonly Access**.
 - Browser sound depends on watchOS browser support and user gesture rules.
 
 ## Test

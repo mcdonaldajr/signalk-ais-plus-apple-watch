@@ -1,5 +1,5 @@
-const WATCH_PLUGIN = "signalk-ais-plus-apple-watch";
-const AIS_PLUS_PLUGIN = "signalk-ais-plus";
+const WATCH_SETTINGS_PATH = "/signalk/v1/api/vessels/self/plugins/aisPlusAppleWatch/settings";
+const WATCH_MESSAGES_PATH = "/signalk/v1/api/vessels/self/plugins/aisPlusAppleWatch/messages";
 
 const els = {
   enableSound: document.getElementById("enableSound"),
@@ -46,9 +46,24 @@ async function requestJson(url) {
   return response.json();
 }
 
+function signalKValue(data, fallback) {
+  if (
+    data &&
+    typeof data === "object" &&
+    Object.prototype.hasOwnProperty.call(data, "value")
+  ) {
+    return data.value;
+  }
+  return data ?? fallback;
+}
+
 async function loadSettings() {
-  const data = await requestJson(`/plugins/${WATCH_PLUGIN}/settings`);
-  settings = { ...settings, ...(data?.settings || {}) };
+  try {
+    const data = await requestJson(WATCH_SETTINGS_PATH);
+    settings = { ...settings, ...(signalKValue(data, {}) || {}) };
+  } catch (error) {
+    console.warn("Using default watch settings", error);
+  }
   document.documentElement.style.setProperty(
     "--message-font-size",
     `${settings.fontSizePx}px`,
@@ -110,8 +125,9 @@ async function beep() {
 }
 
 async function loadMessages() {
-  const data = await requestJson(`/plugins/${AIS_PLUS_PLUGIN}/announcementLog`);
-  const entries = Array.isArray(data?.entries) ? data.entries : [];
+  const data = await requestJson(WATCH_MESSAGES_PATH);
+  const value = signalKValue(data, []);
+  const entries = Array.isArray(value) ? value : [];
   const nextKey = messageKey(entries[0]);
   const isFresh = nextKey && lastMessageKey && nextKey !== lastMessageKey;
 
