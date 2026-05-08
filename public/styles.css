@@ -31,15 +31,21 @@ main {
 }
 
 #enableSound {
-  width: 100%;
-  min-height: 34px;
+  align-self: flex-start;
+  max-width: 100%;
+  min-width: 0;
+  min-height: 28px;
+  padding: 4px 8px;
   border: 1px solid #fff;
   border-radius: 0;
   background: #000;
   color: #fff;
   font: inherit;
-  font-size: 15px;
+  font-size: clamp(11px, 8vw, 14px);
   font-weight: 700;
+  line-height: 1;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 #enableSound.enabled {
