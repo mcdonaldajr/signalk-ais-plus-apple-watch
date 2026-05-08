@@ -5,9 +5,9 @@ module.exports = function aisPlusAppleWatch(app) {
   let options = normalizeOptions({});
 
   plugin.id = "signalk-ais-plus-apple-watch";
-  plugin.name = "AIS Plus Apple Watch";
+  plugin.name = "AIS Plus Alerts";
   plugin.description =
-    "Minimal Apple Watch webapp that displays AIS Plus announcement messages.";
+    "Minimal Apple Watch webapp that displays AIS Plus alert announcement messages.";
 
   plugin.schema = {
     type: "object",

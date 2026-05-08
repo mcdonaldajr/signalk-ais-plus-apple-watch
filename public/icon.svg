@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="AIS Plus Alerts">
+  <rect width="120" height="120" rx="24" fill="#000"/>
+  <rect x="31" y="14" width="58" height="92" rx="18" fill="none" stroke="#fff" stroke-width="7"/>
+  <rect x="26" y="40" width="5" height="22" rx="2.5" fill="#fff"/>
+  <rect x="89" y="43" width="5" height="16" rx="2.5" fill="#fff"/>
+  <path d="M60 32l9 19H51l9-19z" fill="#00d084"/>
+  <rect x="43" y="62" width="34" height="6" rx="3" fill="#fff"/>
+  <rect x="43" y="74" width="25" height="6" rx="3" fill="#fff"/>
+  <circle cx="80" cy="28" r="10" fill="#ffb000"/>
+</svg>
