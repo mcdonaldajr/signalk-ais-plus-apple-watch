@@ -2,7 +2,7 @@
 
 AIS Plus Alerts is a very small Signal K webapp for Apple Watch screens.
 
-It displays the AIS Plus alert announcement log as white text on a black background. It is built specifically for AIS Plus alerts and is not a general-purpose AIS app display. When a fresh AIS Plus message appears, the page scrolls back to the newest message at the top and tries to play a short browser beep. Updates to the same alert, such as changing CPA or TCPA text, refresh the display without beeping again.
+It displays the compact AIS Plus alert feed as white text on a black background. It is built specifically for AIS Plus alerts and is not a general-purpose AIS app display. When a fresh AIS Plus message appears, the page scrolls back to the newest message at the top and tries to play a short browser beep. Updates to the same active vessel alert, such as changing CPA or TCPA text, refresh the display without beeping again.
 
 The watch browser may require a tap before sound is allowed. Tap **Sound on** after opening the page. Tap **Sound off** to silence browser beeps. If watchOS blocks browser audio, the page still updates visually.
 
@@ -12,7 +12,7 @@ Apple Watch can play media audio to paired Bluetooth headphones or speakers, and
 
 ```bash
 cd ~/.signalk
-npm install git+ssh://git@ssh.github.com:443/mcdonaldajr/signalk-ais-plus-apple-watch.git#v0.1.4 --omit=dev --no-package-lock
+npm install git+ssh://git@ssh.github.com:443/mcdonaldajr/signalk-ais-plus-apple-watch.git#v1.0.1 --omit=dev --no-package-lock
 sudo systemctl restart signalk
 ```
 
@@ -39,7 +39,8 @@ The page deliberately avoids charts, graphics, controls, and colours other than 
 ## Requirements
 
 - AIS Plus must be installed and running.
-- The plugin subscribes to AIS Plus collision notifications and republishes a small read-only watch feed under `vessels.self.plugins.aisPlusAppleWatch`.
+- The watch page reads `vessels.self.plugins.aisPlus.uiState.compactAlertFeed` from AIS Plus.
+- If that compact AIS Plus feed is unavailable, the plugin falls back to its older local read-only feed under `vessels.self.plugins.aisPlusAppleWatch`.
 - The watch page reads Signal K data API paths, not plugin control routes, so it can work with Signal K **Allow Readonly Access**.
 - Browser sound depends on watchOS browser support and user gesture rules.
 
