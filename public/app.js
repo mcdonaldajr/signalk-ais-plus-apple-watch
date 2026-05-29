@@ -1,5 +1,6 @@
 const WATCH_SETTINGS_PATH = "/signalk/v1/api/vessels/self/plugins/aisPlusAppleWatch/settings";
 const WATCH_MESSAGES_PATH = "/signalk/v1/api/vessels/self/plugins/aisPlusAppleWatch/messages";
+const AIS_PLUS_COMPACT_FEED_PATH = "/signalk/v1/api/vessels/self/plugins/aisPlus/uiState/compactAlertFeed";
 
 const els = {
   enableSound: document.getElementById("enableSound"),
@@ -82,7 +83,10 @@ function messageKey(entry) {
 }
 
 function renderMessages(entries) {
-  const messages = entries.slice(0, settings.maxMessages);
+  const now = Date.now();
+  const messages = entries
+    .filter((entry) => !isExpired(entry, now))
+    .slice(0, settings.maxMessages);
   if (!messages.length) {
     els.messages.innerHTML = '<p class="empty">No messages yet.</p>';
     return;
@@ -95,10 +99,16 @@ function renderMessages(entries) {
         second: "2-digit",
       }) : "";
       return `<article class="message"><time>${escapeHtml(time)}</time>${escapeHtml(
-        entry.message || "",
+        entry.headline || entry.message || "",
       )}</article>`;
     })
     .join("");
+}
+
+function isExpired(entry, now = Date.now()) {
+  if (!entry?.expiresAt) return false;
+  const expiresAt = new Date(entry.expiresAt).getTime();
+  return Number.isFinite(expiresAt) && expiresAt <= now;
 }
 
 async function beep() {
@@ -125,9 +135,7 @@ async function beep() {
 }
 
 async function loadMessages() {
-  const data = await requestJson(WATCH_MESSAGES_PATH);
-  const value = signalKValue(data, []);
-  const entries = Array.isArray(value) ? value : [];
+  const entries = await loadCompactMessages();
   const nextKey = messageKey(entries[0]);
   const isFresh = nextKey && lastMessageKey && nextKey !== lastMessageKey;
 
@@ -139,6 +147,19 @@ async function loadMessages() {
   if (nextKey) lastMessageKey = nextKey;
   els.status.textContent = entries.length ? "Live" : "Waiting";
   els.status.classList.remove("error");
+}
+
+async function loadCompactMessages() {
+  try {
+    const data = await requestJson(AIS_PLUS_COMPACT_FEED_PATH);
+    const feed = signalKValue(data, null);
+    if (Array.isArray(feed?.entries)) return feed.entries;
+  } catch (error) {
+    console.warn("Using legacy watch message feed", error);
+  }
+  const data = await requestJson(WATCH_MESSAGES_PATH);
+  const value = signalKValue(data, []);
+  return Array.isArray(value) ? value : [];
 }
 
 async function enableSound() {

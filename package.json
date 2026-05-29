@@ -1,6 +1,6 @@
 {
   "name": "signalk-ais-plus-apple-watch",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Minimal Apple Watch webapp for AIS Plus alert announcement messages.",
   "main": "plugin/index.js",
   "scripts": {
