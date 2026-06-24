@@ -1,3 +1,9 @@
+# Superseded
+
+This repository is no longer maintained for new Watchkeeper installs. It is retained on GitHub for historical reference only.
+
+Superseded by `signalk-watchkeeper-alerts`, which provides the current crew alert viewer and small-screen alert display over Notifications Plus projections.
+
 # AIS Plus Alerts
 
 AIS Plus Alerts is a very small Signal K webapp for Apple Watch screens.
